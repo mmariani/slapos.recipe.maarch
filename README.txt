@@ -1,0 +1,5 @@
+.. contents::
+
+slapos.recipe.maarch
+====================
+

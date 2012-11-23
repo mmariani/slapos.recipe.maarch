@@ -1,0 +1,7 @@
+Changelog
+=========
+
+0.1-dev (unreleased)
+--------------------
+ - extracted egg from main recipe repositori [Marco Mariani]
+

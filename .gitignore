@@ -1,0 +1,11 @@
+*pyc
+.installed.cfg
+bin/
+build
+develop-eggs/
+dist
+downloads/
+eggs/
+parts/
+slapos.cookbook.maarch.egg-info
+.*.swp
