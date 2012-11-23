@@ -41,7 +41,7 @@ setup(name='slapos.recipe.maarch',
       install_requires=['setuptools',
                         'zc.buildout',
                         # -*- Extra requirements: -*-
-                        'slapos.recipe',
+                        'slapos.cookbook',
                         'psycopg2',
                         ],
       tests_require=tests_require,
