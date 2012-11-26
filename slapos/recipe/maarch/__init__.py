@@ -79,7 +79,8 @@ class Recipe(GenericBaseRecipe):
 
         return ret
 
-
+    # explicitly call install upon update; the install method ought to be smart enough.
+    update = install
 
     def create_apps_config_xml(self):
         options = self.options
@@ -88,11 +89,15 @@ class Recipe(GenericBaseRecipe):
         config_xml_default = os.path.join(folder, 'config.xml.default')
         config_xml = os.path.join(folder, 'config.xml')
 
-        # do not overwrite the config.xml file (it can be customized inside the application)
-        if os.path.exists(config_xml):
-            return
+        updating = os.path.exists(config_xml)
 
-        content = open(config_xml_default, 'rb').read()
+        if updating:
+            # do not overwrite the config.xml file (it can be customized inside the application)
+            config_xml_previous = config_xml
+        else:
+            config_xml_previous = config_xml_default
+
+        content = open(config_xml_previous, 'rb').read()
         xml = lxml.etree.fromstring(content)
 
         xpath_set(xml, {
@@ -101,8 +106,10 @@ class Recipe(GenericBaseRecipe):
             'CONFIG/databasename': options['db_dbname'],
             'CONFIG/databaseuser': options['db_username'],
             'CONFIG/databasepassword': options['db_password'],
-            'CONFIG/lang': options['language'],
             })
+
+        if not updating:
+            xpath_set(xml, {'CONFIG/lang': options['language']})
 
         with os.fdopen(os.open(config_xml, os.O_CREAT | os.O_WRONLY | os.O_TRUNC, 0o600), 'w') as fout:
             fout.write(lxml.etree.tostring(xml, xml_declaration=True, encoding='utf-8').encode('utf-8'))
@@ -117,8 +124,8 @@ class Recipe(GenericBaseRecipe):
         config_xml_default = os.path.join(folder, 'config.xml.default')
         config_xml = os.path.join(folder, 'config.xml')
 
-        # do not overwrite the config.xml file (it can be customized inside the application)
         if os.path.exists(config_xml):
+            # do not overwrite the config.xml file (it can be customized inside the application)
             return
 
         content = open(config_xml_default, 'rb').read()
