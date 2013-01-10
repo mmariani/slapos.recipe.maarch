@@ -31,7 +31,6 @@ import lxml.etree
 import md5
 import os
 
-import lxml
 import psycopg2
 
 from slapos.recipe.librecipe import GenericBaseRecipe
@@ -54,12 +53,31 @@ class Recipe(GenericBaseRecipe):
      - creation of two xml files from the provided defaults
      - php.ini as required by Maarch
      - database setup.
+     - a Maarch 'superadmin' user (with the same password as the Postgres user).
 
-     The superuser password will be the same as the Postgres one.
+    Required options:
+        php_ini
+            full path to the PHP configuration file.
+        htdocs
+            full path to the htdocs directory.
+        db_host
+            ip address of the postgres server.
+        db_port
+            ip port of the postgres server.
+        db_dbname
+            postgres database name.
+        db_username
+            username to authenticate with postgres.
+        db_password
+            password to authenticate with postgres.
+        language
+            language to use with maarch (en or fr).
+        root_docservers
+            where to create docservers directories.
     """
 
     def install(self):
-        self.update_phpini(php_ini_path=os.path.join(self.options['php_ini_dir'], 'php.ini'))
+        self.update_phpini(php_ini_path=self.options['php_ini'])
 
         self.load_initial_db()
 
@@ -225,12 +243,10 @@ class Recipe(GenericBaseRecipe):
         """\
         Create an empty file to mean the setup is completed
         """
-        htdocs = self.options['htdocs']
-        lck_path = os.path.join(htdocs, 'installed.lck')
+        lck_path = os.path.join(self.options['htdocs'], 'installed.lck')
 
         with open(lck_path, 'w'):
             pass
 
         return lck_path
-
 
