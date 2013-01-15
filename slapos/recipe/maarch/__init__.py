@@ -35,9 +35,6 @@ import psycopg2
 
 from slapos.recipe.librecipe import GenericBaseRecipe
 
-# XXX: When run inside webrunner, Postgres refuses connection.
-# TODO: make the recipe work inside webrunner
-
 
 
 def xpath_set(xml, settings):
