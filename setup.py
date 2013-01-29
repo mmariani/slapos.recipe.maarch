@@ -9,9 +9,9 @@ from setuptools import setup, find_packages
 def read(*rnames):
     return open(os.path.join(os.path.dirname(__file__), *rnames)).read()
 
-version = '0.2-dev'
+version = '0.2'
 
-long_description = read('README.txt') + '\n' + read('CHANGES.txt') + '\n'
+long_description = read('README.txt') + '\n'
 
 entry_point = 'slapos.recipe.maarch:Recipe'
 entry_points = {"zc.buildout": ["default = %s" % entry_point]}
