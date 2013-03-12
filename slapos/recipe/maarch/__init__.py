@@ -219,7 +219,7 @@ class Recipe(GenericBaseRecipe):
             cur.execute(fin.read())
 
         # patch the schema to store long addresses (ipv6)
-        cur.execute('ALTER TABLE HISTORY ALTER COLUMN remote_ip TYPE CHAR(255);')
+        cur.execute('ALTER TABLE HISTORY ALTER COLUMN remote_ip TYPE VARCHAR(255);')
 
 
         sql_data_file = options['sql-data-file']
