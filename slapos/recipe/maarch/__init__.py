@@ -172,8 +172,6 @@ class Recipe(GenericBaseRecipe):
         php_ini.set('PHP', 'display_errors', 'on')
         # Data Handling
         php_ini.set('PHP', 'register_globals', 'off')
-        # Session
-        php_ini.set('Session', 'session.auto_start', '0')
         # Allow short tags
         php_ini.set('PHP', 'short_open_tag', 'on')
         # Html Charset
@@ -223,13 +221,26 @@ class Recipe(GenericBaseRecipe):
         # patch the schema to store long addresses (ipv6)
         cur.execute('ALTER TABLE HISTORY ALTER COLUMN remote_ip TYPE CHAR(255);')
 
-        with open(os.path.join(htdocs, 'data_mini.sql')) as fin:
+
+        sql_data_file = options['sql-data-file']
+
+        with open(os.path.join(htdocs, sql_data_file or 'data_mini.sql')) as fin:
             cur.execute(fin.read())
 
         # initial admin password
         enc_password = md5.md5(options['db_password']).hexdigest()
         cur.execute("UPDATE users SET password=%s WHERE user_id='superadmin';", (enc_password, ))
 
+        if not sql_data_file:
+            self.update_docservers(cur)
+        # else skip docserver configuration, they are already in the sql-data-file
+
+        conn.commit()
+        cur.close()
+        conn.close()
+
+
+    def update_docservers(self, cur):
         # directories described in http://wiki.maarch.org/Maarch_Entreprise/fr/Man/Admin/Stockage
         for docserver_id, foldername in [
                 ('OFFLINE_1', 'offline'),
@@ -248,10 +259,6 @@ class Recipe(GenericBaseRecipe):
                     pass
                 else:
                     raise
-
-        conn.commit()
-        cur.close()
-        conn.close()
 
 
     def installed_lock(self):
