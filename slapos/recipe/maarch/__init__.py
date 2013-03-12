@@ -71,6 +71,10 @@ class Recipe(GenericBaseRecipe):
             language to use with maarch (en or fr).
         root_docservers
             where to create docservers directories.
+
+    Maarch configuration is detailed at
+    http://wiki.maarch.org/Maarch_Framework_3/Setup_and_configuration_guide
+    (beware: old document)
     """
 
     def install(self):
@@ -163,10 +167,21 @@ class Recipe(GenericBaseRecipe):
         php_ini = ConfigParser.RawConfigParser()
         php_ini.read(php_ini_path)
 
+        # Error Handling and Logging
         php_ini.set('PHP', 'error_reporting', 'E_ALL & ~E_DEPRECATED & ~E_NOTICE')
-        php_ini.set('PHP', 'display_errors', 'On')
-        php_ini.set('PHP', 'short_open_tag', 'On')
-        php_ini.set('PHP', 'magic_quotes_gpc', 'Off')
+        php_ini.set('PHP', 'display_errors', 'on')
+        # Data Handling
+        php_ini.set('PHP', 'register_globals', 'off')
+        # Session
+        php_ini.set('Session', 'session.auto_start', '0')
+        # Allow short tags
+        php_ini.set('PHP', 'short_open_tag', 'on')
+        # Html Charset
+        php_ini.set('PHP', 'default_charset', 'UTF-8')
+        #  Magic Quotes
+        php_ini.set('PHP', 'magic_quotes_gpc', 'off')
+        php_ini.set('PHP', 'magic_quotes_runtime', 'off')
+        php_ini.set('PHP', 'magic_quotes_sybase', 'off')
 
         with os.fdopen(os.open(php_ini_path, os.O_CREAT | os.O_WRONLY | os.O_TRUNC, 0o600), 'w') as fout:
             php_ini.write(fout)
