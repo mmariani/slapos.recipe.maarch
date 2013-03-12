@@ -53,23 +53,23 @@ class Recipe(GenericBaseRecipe):
      - a Maarch 'superadmin' user (with the same password as the Postgres user).
 
     Required options:
-        php_ini
+        php-ini
             full path to the PHP configuration file.
         htdocs
             full path to the htdocs directory.
-        db_host
+        db-host
             ip address of the postgres server.
-        db_port
+        db-port
             ip port of the postgres server.
-        db_dbname
+        db-dbname
             postgres database name.
-        db_username
+        db-username
             username to authenticate with postgres.
-        db_password
+        db-password
             password to authenticate with postgres.
         language
             language to use with maarch (en or fr).
-        root_docservers
+        root-docservers
             where to create docservers directories.
 
     Maarch configuration is detailed at
@@ -78,10 +78,10 @@ class Recipe(GenericBaseRecipe):
     """
 
     def install(self):
-        if not self.options['db_port']:
+        if not self.options['db-port']:
             raise ValueError, "DB connection parameters are not ready yet"
 
-        self.update_phpini(php_ini_path=self.options['php_ini'])
+        self.update_phpini(php_ini_path=self.options['php-ini'])
 
         self.load_initial_db()
 
@@ -123,11 +123,11 @@ class Recipe(GenericBaseRecipe):
         xml = lxml.etree.fromstring(content)
 
         xpath_set(xml, {
-            'CONFIG/databaseserver': options['db_host'],
-            'CONFIG/databaseserverport': options['db_port'],
-            'CONFIG/databasename': options['db_dbname'],
-            'CONFIG/databaseuser': options['db_username'],
-            'CONFIG/databasepassword': options['db_password'],
+            'CONFIG/databaseserver': options['db-host'],
+            'CONFIG/databaseserverport': options['db-port'],
+            'CONFIG/databasename': options['db-dbname'],
+            'CONFIG/databaseuser': options['db-username'],
+            'CONFIG/databasepassword': options['db-password'],
             })
 
         if not updating:
@@ -198,11 +198,11 @@ class Recipe(GenericBaseRecipe):
 
         options = self.options
 
-        conn = psycopg2.connect(host = options['db_host'],
-                                port = int(options['db_port']),
-                                database = options['db_dbname'],
-                                user = options['db_username'],
-                                password = options['db_password'])
+        conn = psycopg2.connect(host = options['db-host'],
+                                port = int(options['db-port']),
+                                database = options['db-dbname'],
+                                user = options['db-username'],
+                                password = options['db-password'])
 
         cur = conn.cursor()
 
@@ -228,7 +228,7 @@ class Recipe(GenericBaseRecipe):
             cur.execute(fin.read())
 
         # initial admin password
-        enc_password = md5.md5(options['db_password']).hexdigest()
+        enc_password = md5.md5(options['db-password']).hexdigest()
         cur.execute("UPDATE users SET password=%s WHERE user_id='superadmin';", (enc_password, ))
 
         if not sql_data_file:
@@ -250,7 +250,7 @@ class Recipe(GenericBaseRecipe):
                 ('FASTHD_MAN', 'manual'),
                 ('TEMPLATES', 'templates'),
                 ]:
-            full_path = os.path.join(self.options['root_docservers'], foldername)
+            full_path = os.path.join(self.options['root-docservers'], foldername)
             cur.execute('UPDATE docservers SET path_template=%s WHERE docserver_id=%s', (full_path, docserver_id))
             try:
                 os.makedirs(full_path)
