@@ -74,6 +74,9 @@ class Recipe(GenericBaseRecipe):
     """
 
     def install(self):
+        if not self.options['db_port']:
+            raise ValueError, "DB connection parameters are not ready yet"
+
         self.update_phpini(php_ini_path=self.options['php_ini'])
 
         self.load_initial_db()
