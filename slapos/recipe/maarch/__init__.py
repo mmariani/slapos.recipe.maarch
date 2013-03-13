@@ -30,6 +30,7 @@ import errno
 import lxml.etree
 import md5
 import os
+import shutil
 
 import psycopg2
 
@@ -233,17 +234,24 @@ class Recipe(GenericBaseRecipe):
         enc_password = md5.md5(options['db-password']).hexdigest()
         cur.execute("UPDATE users SET password=%s WHERE user_id='superadmin';", (enc_password, ))
 
-        if not sql_data_file:
-            self.update_docservers(cur)
-        # else skip docserver configuration, they are already in the sql-data-file
+
+        docservers_path = options['maarch-docservers-path']
+        if docservers_path == 'null':     # workaround for proxy bug
+            docservers_path = ''
+
+        self.update_docservers(cur, docservers_path)
 
         conn.commit()
         cur.close()
         conn.close()
 
 
-    def update_docservers(self, cur):
+    def update_docservers(self, cur, docservers_path):
         # directories described in http://wiki.maarch.org/Maarch_Entreprise/fr/Man/Admin/Stockage
+
+        docservers_src = docservers_path
+        docservers_dst = self.options['root-docservers']
+
         for docserver_id, foldername in [
                 ('OFFLINE_1', 'offline'),
                 ('FASTHD_AI', 'ai'),
@@ -252,10 +260,13 @@ class Recipe(GenericBaseRecipe):
                 ('FASTHD_MAN', 'manual'),
                 ('TEMPLATES', 'templates'),
                 ]:
-            full_path = os.path.join(self.options['root-docservers'], foldername)
-            cur.execute('UPDATE docservers SET path_template=%s WHERE docserver_id=%s', (full_path, docserver_id))
+            dst_path = os.path.join(docservers_dst, foldername)
+            cur.execute('UPDATE docservers SET path_template=%s WHERE docserver_id=%s', (dst_path, docserver_id))
             try:
-                os.makedirs(full_path)
+                if docservers_src:
+                    shutil.copytree(os.path.join(docservers_src, foldername), dst_path)
+                else:
+                    os.makedirs(dst_path)
             except OSError as exc:
                 if exc.errno == errno.EEXIST:
                     pass
