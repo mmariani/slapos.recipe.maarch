@@ -223,6 +223,8 @@ class Recipe(GenericBaseRecipe):
 
 
         sql_data_file = options['sql-data-file']
+        if sql_data_file == 'null':     # workaround for proxy bug
+            sql_data_file = ''
 
         with open(os.path.join(htdocs, sql_data_file or 'data_mini.sql')) as fin:
             cur.execute(fin.read())
