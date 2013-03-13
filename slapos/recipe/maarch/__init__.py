@@ -222,7 +222,7 @@ class Recipe(GenericBaseRecipe):
         cur.execute('ALTER TABLE HISTORY ALTER COLUMN remote_ip TYPE VARCHAR(255);')
 
 
-        sql_data_file = options['sql-data-file']
+        sql_data_file = options['maarch-sql-data-file']
         if sql_data_file == 'null':     # workaround for proxy bug
             sql_data_file = ''
 
