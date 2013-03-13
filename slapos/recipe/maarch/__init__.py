@@ -72,6 +72,8 @@ class Recipe(GenericBaseRecipe):
             language to use with maarch (en or fr).
         root-docservers
             where to create docservers directories.
+        sql_data_file
+            path to data to be loaded in the DB (without the schema)
 
     Maarch configuration is detailed at
     http://wiki.maarch.org/Maarch_Framework_3/Setup_and_configuration_guide
@@ -234,23 +236,17 @@ class Recipe(GenericBaseRecipe):
         enc_password = md5.md5(options['db-password']).hexdigest()
         cur.execute("UPDATE users SET password=%s WHERE user_id='superadmin';", (enc_password, ))
 
-
-        docservers_path = options['maarch-docservers-path']
-        if docservers_path == 'null':     # workaround for proxy bug
-            docservers_path = ''
-
-        self.update_docservers(cur, docservers_path)
+        self.update_docservers(cur)
 
         conn.commit()
         cur.close()
         conn.close()
 
 
-    def update_docservers(self, cur, docservers_path):
+    def update_docservers(self, cur):
         # directories described in http://wiki.maarch.org/Maarch_Entreprise/fr/Man/Admin/Stockage
 
-        docservers_src = docservers_path
-        docservers_dst = self.options['root-docservers']
+        root_docservers = self.options['root-docservers']
 
         for docserver_id, foldername in [
                 ('OFFLINE_1', 'offline'),
@@ -260,13 +256,10 @@ class Recipe(GenericBaseRecipe):
                 ('FASTHD_MAN', 'manual'),
                 ('TEMPLATES', 'templates'),
                 ]:
-            dst_path = os.path.join(docservers_dst, foldername)
+            dst_path = os.path.join(root_docservers, foldername)
             cur.execute('UPDATE docservers SET path_template=%s WHERE docserver_id=%s', (dst_path, docserver_id))
             try:
-                if docservers_src:
-                    shutil.copytree(os.path.join(docservers_src, foldername), dst_path)
-                else:
-                    os.makedirs(dst_path)
+                os.makedirs(dst_path)
             except OSError as exc:
                 if exc.errno == errno.EEXIST:
                     pass
